@@ -1,0 +1,32 @@
+use role dbt_role;
+use database dbt_db;
+use schema dbt_schema;
+-- INTERMEDIATE TABLES/VIEWS
+select * from int_order_items limit 10;
+describe table int_order_items;
+-- ORDER_ITEM_KEY
+-- PART_KEY
+-- LINE_NUMBER
+-- EXTENDED_PRICE
+-- ORDER_KEY
+-- CUSTOMER_KEY
+-- ORDER_DATE
+-- ITEM_DISCOUNT_AMOUNT
+
+select * from int_order_items_summary limit 10;
+describe table int_order_items_summary ;
+-- ORDER_KEY
+-- GROSS_ITEM_SALES_AMOUNT
+-- ITEM_DISCOUNT_AMOUNT
+
+
+-- FACT TABLE/VIEW
+select * from fct_orders limit 10;
+describe table fct_orders ;
+-- ORDER_KEY
+-- CUSTOMER_KEY
+-- STATUS_CODE
+-- TOTAL_PRICE
+-- ORDER_DATE
+-- GROSS_ITEM_SALES_AMOUNT
+-- ITEM_DISCOUNT_AMOUNT

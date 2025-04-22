@@ -1,0 +1,24 @@
+######################## DBT DEPLOYMENT VIA AIRFLOW ########################
+#### Run your dbt Core projects as Apache Airflow DAGs and Task Groups with a few lines of code
+https://github.com/astronomer/astronomer-cosmos
+# install astro
+(dbt-env)$ brew install astro
+
+# Create a DAG folder
+(dbt-env)$ mkdir dbt-dag
+(dbt-env)$ cd dbt-dag
+(dbt-env)$ astro dev init
+
+# update docker file
+Add:
+RUN python -m venv dbt_venv && source dbt_venv/bin/activate && \
+    pip install --no-cache-dir dbt-snowflake && deactivate
+
+# update requirements.txt
+astronomer-cosmos
+apache-airflow-providers-snowflake
+
+# login to Docker
+
+# Start Airflow using astro
+astro dev start
