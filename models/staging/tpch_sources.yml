@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: tpch
+    database: snowflake_sample_data # tpch is provided sample data by snowflake
+    schema: tpch_sf1 # this is the sample dataset's schema
+    tables:
+      - name: orders # this is the sample table name inside tpch_sf1
+        columns:
+          - name: o_orderkey # this is the order key column in orders table
+            tests: # write to make sure o_orderkey is unique
+              - unique
+              - not_null
+      - name: lineitem # this is another sample table name inside tpch_sf1
+        columns:
+          - name: l_orderkey # this is the foreign key column in lineitem to orders table
+            tests:
+              - relationships:
+                  to: "source('tpch', 'orders')"
+                  field: o_orderkey

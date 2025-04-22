@@ -1,17 +1,20 @@
+###################################### PYTHON PROJECT ###############################################
 # Python Virtual env
 1. Create a virtual environment
-    python3 -m venv dbt-env
+    >> python3 -m venv dbt-env
 2. Activate the virtual environment
-    source dbt-env/bin/activate
+    >> source dbt-env/bin/activate
 3. Leave virtual env
-    deactivate
+    >> deactivate
+#############################################################################################
+
+############################# DBT INFO ###################################
+# Where is pip install dbt_core and dbt_snowflake installed?
+Right now it is in this project's virtual env -> venv
 
 # dbt_project.yaml
 1. What is it? Where to look for models folder
 2. In Models we configure -> the tables created for staging and marts can be set to views or tables(how they materialize)
-
-# Install the packages.yaml
-In venv -> dbt deps
 
 # Models
 This is where SQL logic files, staging files, models, mart scripts live
@@ -25,4 +28,40 @@ useful for creating incremental models
 # tests
 1. Singular (check if values > 0 or if it is null etc type of tests)
 2. Data tests (Validate the data)
+#############################################################################################
 
+###################################### DBT CLI ##############################################
+# How to initialize dbt project
+(dbt-env)$ dbt init
+16:54:40  Running with dbt=1.9.4
+16:54:40  Setting up your profile.
+Which database would you like to use?
+[1] snowflake
+
+(Don't see the one you want? https://docs.getdbt.com/docs/available-adapters)
+
+Enter a number: 1
+account (https://<this_value>.snowflakecomputing.com): <Go to Snowflake -> Account -> use account identifier>
+user (dev username): <REDACTED>
+[1] password
+[2] keypair
+[3] sso
+Desired authentication type option (enter a number): 1
+password (dev password):
+role (dev role): dbt_role
+warehouse (warehouse name): dbt_wh
+database (default database that dbt will build objects in): dbt_db
+schema (default schema that dbt will build objects in): dbt_schema
+threads (1 or more) [1]: 10
+16:56:03  Profile data_pipeline written to /Users/<REDACTED>/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+
+
+# Install the packages.yaml
+(dbt-env)$ dbt deps
+
+# Run dbt project
+(dbt-env)$ dbt run
+
+# Run dbt one file
+(dbt-env)$ dbt run -s stg_tpch_line_items.sql
+#############################################################################################
