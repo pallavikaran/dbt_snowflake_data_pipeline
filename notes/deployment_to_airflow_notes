@@ -22,3 +22,5 @@ apache-airflow-providers-snowflake
 
 # Start Airflow using astro
 astro dev start
+
+astro dev stop
