@@ -1,0 +1,28 @@
+# Python Virtual env
+1. Create a virtual environment
+    python3 -m venv dbt-env
+2. Activate the virtual environment
+    source dbt-env/bin/activate
+3. Leave virtual env
+    deactivate
+
+# dbt_project.yaml
+1. What is it? Where to look for models folder
+2. In Models we configure -> the tables created for staging and marts can be set to views or tables(how they materialize)
+
+# Install the packages.yaml
+In venv -> dbt deps
+
+# Models
+This is where SQL logic files, staging files, models, mart scripts live
+
+# Seeds
+static files where data will never change very often.
+
+# Snapshots
+useful for creating incremental models
+
+# tests
+1. Singular (check if values > 0 or if it is null etc type of tests)
+2. Data tests (Validate the data)
+
