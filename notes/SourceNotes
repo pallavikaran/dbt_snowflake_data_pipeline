@@ -1,2 +1,21 @@
 https://bittersweet-mall-f00.notion.site/Code-along-build-an-ELT-Pipeline-in-1-Hour-dbt-Snowflake-Airflow-cffab118a21b40b8acd3d595a4db7c15
 https://www.youtube.com/watch?v=OLXkGB7krGo
+
+# Install dbt
+pip install dbt-core
+
+# Install dbt-snowflake
+pip install dbt-snowflake
+
+# Create a folder to keep your git project
+mkdir dbt_snowflake_project
+
+# Create a github project
+cd dbt_snowflake_project/
+mkdir data_pipeline
+
+# Create a virtual environment
+python3 -m venv dbt-env
+
+# Activate the virtual environment
+source dbt-env/bin/activate
