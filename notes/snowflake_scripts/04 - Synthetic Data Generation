@@ -1,0 +1,98 @@
+USE ROLE ACCOUNTADMIN;
+CREATE or REPLACE DATABASE SNOWFLAKE_SAMPLE_DATA from share SFC_SAMPLES.SAMPLE_DATA;
+
+-- Create and configure the access control for the data_engineer role to allow them to create all of the necessary objects
+USE ROLE ACCOUNTADMIN;
+CREATE OR REPLACE ROLE data_engineer;
+CREATE OR REPLACE DATABASE syndata_db;
+CREATE OR REPLACE WAREHOUSE syndata_wh;
+
+GRANT OWNERSHIP ON DATABASE syndata_db TO ROLE data_engineer;
+GRANT USAGE ON WAREHOUSE syndata_wh TO ROLE data_engineer;
+GRANT ROLE data_engineer TO USER jsmith; -- Or whoever you want to run this example. Or skip this line to run it yourself.
+
+-- Create two views from the Snowflake Sample Data database:
+-- Sign in as user with data_engineer role. Then...
+
+CREATE SCHEMA syndata_db.sch;
+CREATE OR REPLACE VIEW syndata_db.sch.TPC_ORDERS_5K as (
+    SELECT * from SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.ORDERS
+    LIMIT 5000
+);
+
+CREATE OR REPLACE VIEW syndata_db.sch.TPC_CUSTOMERS_5K as (
+    SELECT * from SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER
+    LIMIT 5000
+);
+
+-- Query the input tables to view the data and confirm that each table has 5,000 rows
+USE WAREHOUSE syndata_wh;
+SELECT TOP 20 * FROM syndata_db.sch.TPC_ORDERS_5K;
+SELECT COUNT(*) FROM syndata_db.sch.TPC_ORDERS_5K;
+select count(distinct o_clerk), count(*) from syndata_db.sch.TPC_ORDERS_5K;
+
+SELECT TOP 20 * FROM syndata_db.sch.TPC_CUSTOMERS_5K;
+SELECT COUNT(*) FROM syndata_db.sch.TPC_CUSTOMERS_5K;
+
+--------------------------------------------- GENERATE_SYNTHETIC_DATA FUNCTION -------------------------------------------
+
+-- Call the GENERATE_SYNTHETIC_DATA stored procedure to generate the synthetic data into two output tables.
+-- Designate join keys, to join on those keys later.
+ CALL SNOWFLAKE.DATA_PRIVACY.GENERATE_SYNTHETIC_DATA({
+     'datasets':[
+         {
+           'input_table': 'syndata_db.sch.TPC_ORDERS_5K',
+           'output_table': 'syndata_db.sch.TPC_ORDERS_5K_SYNTHETIC',
+           'columns': {'O_CUSTKEY': {'join_key': True}}
+         },
+         {
+           'input_table': 'syndata_db.sch.TPC_CUSTOMERS_5K',
+           'output_table': 'syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC',
+           'columns' : {'C_CUSTKEY': {'join_key': True}}
+
+         }
+       ],
+       'replace_output_tables':True
+   });
+------------------------------------------------------------------------------------------------------------------
+-- Query the output table to view the synthetic data
+SELECT TOP 20 * FROM syndata_db.sch.TPC_ORDERS_5K_SYNTHETIC;
+SELECT COUNT(*) FROM syndata_db.sch.TPC_ORDERS_5K_SYNTHETIC;
+
+SELECT TOP 20 * FROM syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC;
+SELECT COUNT(*) FROM syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC;
+
+-- Clean up all the objects
+-- USE ROLE ACCOUNTADMIN;
+-- DROP DATABASE syndata_db;
+-- DROP ROLE data_engineer;
+-- DROP WAREHOUSE syndata_wh;
+
+--------------------------------------------- MANUAL CUSTOM FUNCTION -------------------------------------------
+-- Snowflake limits recursion to 100,000 rows by default. You can increase this limit if needed
+-- Using SQL functions like SEQUENCE, RANDOM(), and UNIFORM() to generate rows of fake data
+
+WITH RECURSIVE seq AS (
+  SELECT 1 AS id
+  UNION ALL
+  SELECT id + 1 FROM seq WHERE id < 1000
+)
+SELECT
+  id,
+  'Customer_' || id AS customer_name,
+  UNIFORM(18, 70, RANDOM()) AS age,
+  ROUND(UNIFORM(30000, 120000, RANDOM()), 2) AS income,
+  CURRENT_DATE - UNIFORM(0, 3650, RANDOM()) AS signup_date
+FROM seq;
+
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------ TABLE(GENERATOR(...)) for Row Generation ------------------------------
+-- Snowflake’s GENERATOR function is optimized for creating large row sets
+
+SELECT
+  SEQ4() AS id,
+  'User_' || SEQ4() AS username,
+  UNIFORM(18, 65, RANDOM()) AS age,
+  TO_DATE('2000-01-01') + UNIFORM(0, 8000, RANDOM()) AS signup_date
+FROM TABLE(GENERATOR(ROWCOUNT => 100000));
+------------------------------------------------------------------------------------------------------------------

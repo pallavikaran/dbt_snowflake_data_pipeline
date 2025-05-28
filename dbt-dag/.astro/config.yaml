@@ -1,0 +1,4 @@
+project:
+    name: dbt-dag
+airflow:
+    image: quay.io/astronomer/astro-runtime:9.2.0
