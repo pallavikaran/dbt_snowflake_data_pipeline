@@ -1,20 +1,46 @@
+-- 1. Use the highest privilege role
 USE ROLE ACCOUNTADMIN;
-CREATE or REPLACE DATABASE SNOWFLAKE_SAMPLE_DATA from share SFC_SAMPLES.SAMPLE_DATA;
 
--- Create and configure the access control for the data_engineer role to allow them to create all of the necessary objects
-USE ROLE ACCOUNTADMIN;
+-- 2. Create shared sample data database (optional, only if needed)
+CREATE OR REPLACE DATABASE SNOWFLAKE_SAMPLE_DATA FROM SHARE SFC_SAMPLES.SAMPLE_DATA;
+
+-- 3. Create custom role and assign it to user
 CREATE OR REPLACE ROLE data_engineer;
+GRANT ROLE data_engineer TO USER pallavikaran1;
+
+-- 4. Create a database and warehouse
 CREATE OR REPLACE DATABASE syndata_db;
 CREATE OR REPLACE WAREHOUSE syndata_wh;
 
-GRANT OWNERSHIP ON DATABASE syndata_db TO ROLE data_engineer;
+-- USE ROLE data_engineer;
+USE DATABASE syndata_db;
+USE SCHEMA public;
+
+-- Try creating something
+CREATE OR REPLACE TABLE test_table (
+    id INT,
+    name STRING
+);
+
+-- 5. Grant warehouse usage
 GRANT USAGE ON WAREHOUSE syndata_wh TO ROLE data_engineer;
-GRANT ROLE data_engineer TO USER pallavikaran1; -- Or whoever you want to run this example. Or skip this line to run it yourself.
 
--- Create two views from the Snowflake Sample Data database:
--- Sign in as user with data_engineer role. Then...
+-- ✅ 6. Transfer ownership of the database using correct syntax
+-- GRANT OWNERSHIP ON DATABASE syndata_db TO ROLE data_engineer REVOKE CURRENT GRANTS;
 
+-- 7. Switch to the role to create objects inside it (if desired)
+-- USE ROLE data_engineer;
+
+-- 8. Create a schema inside the database (only after switching role or giving permission)
+-- If staying as ACCOUNTADMIN, give usage & create privileges on database to role
+GRANT USAGE ON DATABASE syndata_db TO ROLE data_engineer;
+GRANT CREATE SCHEMA ON DATABASE syndata_db TO ROLE data_engineer;
+
+-- OR, switch role and create schema:
+--USE ROLE data_engineer;
 CREATE SCHEMA syndata_db.sch;
+
+
 CREATE OR REPLACE VIEW syndata_db.sch.TPC_ORDERS_5K as (
     SELECT * from SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.ORDERS
     LIMIT 5000
@@ -68,7 +94,7 @@ SELECT COUNT(*) FROM syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC;
 -- DROP ROLE data_engineer;
 -- DROP WAREHOUSE syndata_wh;
 
---------------------------------------------- MANUAL CUSTOM FUNCTION -------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
 -- Snowflake limits recursion to 100,000 rows by default. You can increase this limit if needed
 -- Using SQL functions like SEQUENCE, RANDOM(), and UNIFORM() to generate rows of fake data
 
@@ -88,7 +114,6 @@ FROM seq;
 ------------------------------------------------------------------------------------------------------------------
 ------------------------------------------ TABLE(GENERATOR(...)) for Row Generation ------------------------------
 -- Snowflake’s GENERATOR function is optimized for creating large row sets
-
 SELECT
   SEQ4() AS id,
   'User_' || SEQ4() AS username,
