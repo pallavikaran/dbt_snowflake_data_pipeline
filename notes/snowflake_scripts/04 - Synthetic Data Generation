@@ -9,7 +9,7 @@ CREATE OR REPLACE WAREHOUSE syndata_wh;
 
 GRANT OWNERSHIP ON DATABASE syndata_db TO ROLE data_engineer;
 GRANT USAGE ON WAREHOUSE syndata_wh TO ROLE data_engineer;
-GRANT ROLE data_engineer TO USER jsmith; -- Or whoever you want to run this example. Or skip this line to run it yourself.
+GRANT ROLE data_engineer TO USER pallavikaran1; -- Or whoever you want to run this example. Or skip this line to run it yourself.
 
 -- Create two views from the Snowflake Sample Data database:
 -- Sign in as user with data_engineer role. Then...
