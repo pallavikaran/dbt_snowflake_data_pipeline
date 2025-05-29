@@ -40,7 +40,7 @@ GRANT CREATE SCHEMA ON DATABASE syndata_db TO ROLE data_engineer;
 --USE ROLE data_engineer;
 CREATE SCHEMA syndata_db.sch;
 
--------------------- 1. SQL functions like SEQUENCE, RANDOM(), and UNIFORM() -------------------------------
+-- ====================== 1. SQL functions like SEQUENCE, RANDOM(), and UNIFORM() ==================================
 -- Snowflake limits recursion to 100,000 rows by default. You can increase this limit if needed
 -- Using SQL functions like SEQUENCE, RANDOM(), and UNIFORM() to generate rows of fake data
 
@@ -57,8 +57,9 @@ SELECT
   CURRENT_DATE - UNIFORM(0, 3650, RANDOM()) AS signup_date
 FROM seq;
 
-------------------------------------------------------------------------------------------------------------------
------------------------------------------- 2. TABLE(GENERATOR(...)) for Row Generation ------------------------------
+-- ================================================================================================================
+-- ================================== 2. TABLE(GENERATOR(...)) for Row Generation ==================================
+
 -- Snowflake’s GENERATOR function is optimized for creating large row sets
 SELECT
   SEQ4() AS id,
@@ -66,9 +67,10 @@ SELECT
   UNIFORM(18, 65, RANDOM()) AS age,
   TO_DATE('2000-01-01') + UNIFORM(0, 8000, RANDOM()) AS signup_date
 FROM TABLE(GENERATOR(ROWCOUNT => 100000));
-------------------------------------------------------------------------------------------------------------------
 
---------------------------------------------- 3. GENERATE_SYNTHETIC_DATA FUNCTION -------------------------------------------
+-- ================================================================================================================
+-- ================================== 3. GENERATE_SYNTHETIC_DATA FUNCTION =========================================
+
 CREATE OR REPLACE TABLE syndata_db.sch.synthetic_users (
     user_id INT,
     username STRING,
@@ -99,7 +101,9 @@ $$;
 CALL syndata_db.sch.GENERATE_SYNTHETIC_DATA(1000);
 SELECT * FROM syndata_db.sch.synthetic_users LIMIT 10;
 
----------------------------------------------- 4. DATA_PRIVACY.GENERATE_SYNTHETIC_DATA  -------------------------------------------
+-- ================================================================================================================
+-- ======================================== 4. DATA_PRIVACY.GENERATE_SYNTHETIC_DATA  ==============================
+
 CREATE OR REPLACE VIEW syndata_db.sch.TPC_ORDERS_5K as (
     SELECT * from SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.ORDERS
     LIMIT 5000
@@ -144,12 +148,14 @@ SELECT COUNT(*) FROM syndata_db.sch.TPC_ORDERS_5K_SYNTHETIC;
 
 SELECT TOP 20 * FROM syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC;
 SELECT COUNT(*) FROM syndata_db.sch.TPC_CUSTOMERS_5K_SYNTHETIC;
+-- ================================================================================================================
 
 -- Clean up all the objects
 -- USE ROLE ACCOUNTADMIN;
 -- DROP DATABASE syndata_db;
 -- DROP ROLE data_engineer;
 -- DROP WAREHOUSE syndata_wh;
+
 
 
 
